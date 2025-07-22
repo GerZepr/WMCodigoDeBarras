@@ -1,0 +1,12 @@
+
+.box {
+    border: 1px solid #007bff; /* Border color */
+    border-radius: 5px; /* Rounded corners */
+    padding: 20px; /* Spacing inside the box */
+    text-align: center; /* Center align text */
+    margin: 10px; /* Spacing between boxes */
+    background-color: #f8f9fa; /* Light background color */
+}
+.large-box {
+    height: 200px; /* Height for the larger box */
+}
