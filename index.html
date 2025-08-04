@@ -113,11 +113,13 @@
           <input type="text" class="form-control" placeholder="Box sequence" oninput="updateManualInput('Consecutivo', this.value)" />
         </div>
       </div>
+      <!--
       <div class="col-md-4">
         <div class="box"><h3>PRODUCTO</h3>
           <input type="text" id="setName" class="form-control" placeholder="Name this set" />
         </div>
       </div>
+      -->
 
       <!-- Preview -->
       <div class="col-md-12">
@@ -194,7 +196,8 @@
     }
 
     async function saveCurrentSet() {
-      const name = document.getElementById('setName').value.trim() || `Set ${sets.length + 1}`;
+      //const name = document.getElementById('setName').value.trim() || `Set ${sets.length + 1}`;
+      const name = ""; // No title 
       const OCBase64 = selectedOptions.OC ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.OC)}&code=Code128`) : '';
       const ConsBase64 = selectedOptions.Consecutivo ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.Consecutivo)}&code=Code128`) : '';
       sets.push({ name, options: { ...selectedOptions }, images: { ...selectedImages, OCBarcode: OCBase64, ConsBarcode: ConsBase64 } });
@@ -222,7 +225,7 @@
         position: absolute;
         top: 5px;
         right: 5px;
-        background-color: red;
+        background-color: white;
         color: white;
         border: none;
         border-radius: 50%;
@@ -233,16 +236,16 @@
         line-height: 20px;
         padding: 0;
       ">×</button>
-      <div class='set-label' style="margin-bottom: 10px; font-size: 18px; text-align: center;">${set.name}</div>
-      <div class='set-content' style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 20px;">
-        <div style="display: flex; align-items: flex-start; margin-bottom: 5px;"><div class='set-label' style="width: 100px;">CEDIS:</div><img src="${set.images.CEDIS}" class="display-image" /></div>
-        <div style="display: flex; align-items: flex-start; margin-bottom: 5px;"><div class='set-label' style="width: 100px;">OC:</div><img src="${set.images.OCBarcode}" class="display-image" /></div>
-        <div style="display: flex; align-items: flex-start; margin-bottom: 5px;"><div class='set-label' style="width: 100px;">UPC:</div><div>${set.images.UPC.map(src => `<img src="${src}" class="display-image" style="max-width: 140px; max-height: 140px;" />`).join('')}</div></div>
-        <div style="display: flex; flex-direction: column; align-items: flex-start; margin: 5px 0 10px 50px;">
+      
+      <div class='set-content' style="display: flex; flex-direction: column; align-items: flex-start;">
+        <div style="display: flex; align-items: flex-start;"><div class='set-label' style="width: 80px; height: 3.02cm">CEDIS:</div><img src="${set.images.CEDIS}" class="display-image" /></div>
+        <div style="display: flex; align-items: flex-start;"><div class='set-label' style="width: 80px; height: 3.02cm">OC:</div><img src="${set.images.OCBarcode}" class="display-image" /></div>
+        <div style="display: flex; align-items: flex-start;"><div class='set-label' style="width: 80px; height: 2cm">UPC:</div><div>${set.images.UPC.map(src => `<img src="${src}" class="display-image" style="max-width: 140px; max-height: 140px;" />`).join('')}</div></div>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; margin: 5px 25px 10px 25px; height: 3cm">
           ${set.images.TotalPiezasPorCaja.map(src => `<img src="${src}" class="display-image" />`).join('')}
           <div class='set-label'>TOTAL DE PIEZAS POR CAJA</div>
         </div>
-        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 50px;">
+        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 40px; height: 3.5cm;margin-top: 50px">
           <img src="${set.images.ConsBarcode}" class="display-image" />
           <div class='set-label'>CONSECUTIVO DE CAJA</div>
         </div>
@@ -269,7 +272,7 @@ function deleteSet(index) {
 
     function downloadSavedSetsAsPDF() {
       const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: [4, 6] });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'cm', format: [10.16, 15.24] });
       const setBoxes = document.querySelectorAll('.set-box');
       const tasks = Array.from(setBoxes).map(async (box, index) => {
         const canvas = await html2canvas(box, { scale: 3 });
@@ -279,6 +282,18 @@ function deleteSet(index) {
       });
       Promise.all(tasks).then(() => pdf.save('saved_sets.pdf'));
     }
+
+    function resetCurrentSet() {
+  selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
+  selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
+  updateResultBox();
+
+  // Reset all text inputs
+  document.querySelectorAll('input').forEach(input => input.value = '');
+
+  // Reset all dropdowns
+  document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+}
   </script>
 </body>
 </html>
