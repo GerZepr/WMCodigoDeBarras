@@ -16,7 +16,7 @@
     }
     .display-image {
       margin: 5px auto;
-      max-width: 100px;
+      max-width: 100px; /* default cap, overridden inline where needed */
       display: block;
     }
     .result-row {
@@ -149,223 +149,262 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
-    const sets = [];
-    let selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
-    let selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
+/* ================== STATE & HELPERS ================== */
+const sets = [];
+let selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
+let selectedImages  = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
 
-    // ===== Dynamic barcode sizing tables (edit to tune) =====
-    const OC_SIZING = [
-      { max: 4,  w: 320, h: 90 },
-      { max: 8,  w: 280, h: 80 },
-      { max: 12, w: 240, h: 70 },
-      { max: 20, w: 200, h: 60 },
-      { max: 999, w: 180, h: 55 },
-    ];
-    const CONS_SIZING = [
-      { max: 4,  w: 320, h: 90 },
-      { max: 8,  w: 280, h: 80 },
-      { max: 12, w: 240, h: 70 },
-      { max: 20, w: 200, h: 60 },
-      { max: 999, w: 180, h: 55 },
-    ];
-    function getBarcodeStyleByLen(len, type = 'OC') {
-      const table = type === 'OC' ? OC_SIZING : CONS_SIZING;
-      const rule = table.find(r => len <= r.max) || table[table.length - 1];
-      return `width:${rule.w}px; height:${rule.h}px;`;
-    }
+// Dynamic barcode sizing tables (base size by character count)
+const OC_SIZING = [
+  { max: 4,   w: 320, h: 90 },
+  { max: 8,   w: 280, h: 80 },
+  { max: 12,  w: 240, h: 70 },
+  { max: 20,  w: 200, h: 60 },
+  { max: 999, w: 180, h: 55 },
+];
+const CONS_SIZING = [
+  { max: 4,   w: 320, h: 90 },
+  { max: 8,   w: 280, h: 80 },
+  { max: 12,  w: 240, h: 70 },
+  { max: 20,  w: 200, h: 60 },
+  { max: 999, w: 180, h: 55 },
+];
 
-    async function convertBarcodeToBase64(url) {
-      const proxyURL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-      const response = await fetch(proxyURL);
-      const blob = await response.blob();
-      return await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
-      });
-    }
+function getBarcodeStyleByLen(len, type = 'OC') {
+  const table = type === 'OC' ? OC_SIZING : CONS_SIZING;
+  const rule = table.find(r => len <= r.max) || table[table.length - 1];
+  return `width:${rule.w}px; height:${rule.h}px;`;
+}
 
-    function updateManualInput(box, value) {
-      selectedOptions[box] = value;
-      updateResultBox();
-    }
+// Saved-set width bump (width only; height unchanged)
+const SAVED_OC_WIDTH_FACTOR   = 0.7; // 2 = 200% of base width
+const SAVED_CONS_WIDTH_FACTOR = 0.7;
 
-    function selectOption(box, imageSrc, label) {
-      if (!imageSrc) return;
-      if (Array.isArray(selectedOptions[box])) {
-        selectedOptions[box] = [label];
-        selectedImages[box] = [imageSrc];
-      } else {
-        selectedOptions[box] = label;
-        selectedImages[box] = imageSrc;
-      }
-      updateResultBox();
-    }
+function bumpWidthOnly(cssText, factor) {
+  // transforms "width:200px; height:60px;" -> "width:400px; height:60px;" if factor=2
+  return cssText.replace(/width:\s*([\d.]+)px/i, (_, n) =>
+    `width:${Math.round(parseFloat(n) * factor)}px`
+  );
+}
 
-    function updateResultBox() {
-      const oc = selectedOptions.OC || '';
-      const cons = selectedOptions.Consecutivo || '';
+/* ================== CORE ================== */
+async function convertBarcodeToBase64(url) {
+  const proxyURL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+  const response = await fetch(proxyURL);
+  const blob = await response.blob();
+  return await new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
 
-      const ocEl = document.getElementById('barcodeOC');
-      const consEl = document.getElementById('barcodeConsecutivo');
+function updateManualInput(box, value) {
+  selectedOptions[box] = value;
+  updateResultBox();
+}
 
-      ocEl.src = oc ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(oc)}&code=Code128` : '';
-      ocEl.style.cssText = oc ? getBarcodeStyleByLen(oc.length, 'OC') : '';
+function selectOption(box, imageSrc, label) {
+  if (!imageSrc) return;
+  if (Array.isArray(selectedOptions[box])) {
+    selectedOptions[box] = [label];
+    selectedImages[box] = [imageSrc];
+  } else {
+    selectedOptions[box] = label;
+    selectedImages[box] = imageSrc;
+  }
+  updateResultBox();
+}
 
-      consEl.src = cons ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(cons)}&code=Code128` : '';
-      consEl.style.cssText = cons ? getBarcodeStyleByLen(cons.length, 'CONS') : '';
+function updateResultBox() {
+  const oc = selectedOptions.OC || '';
+  const cons = selectedOptions.Consecutivo || '';
 
-      document.getElementById('displayCEDIS').innerHTML =
-        selectedImages.CEDIS ? `<img src="${selectedImages.CEDIS}" class="display-image" />` : '';
+  const ocEl = document.getElementById('barcodeOC');
+  const consEl = document.getElementById('barcodeConsecutivo');
 
-      document.getElementById('displayUPC').innerHTML =
-        selectedImages.UPC.map(src => `<img src="${src}" class="display-image" style="max-width: 140px; max-height: 140px;" />`).join('');
+  ocEl.src = oc ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(oc)}&code=Code128` : '';
+  ocEl.style.cssText = oc ? getBarcodeStyleByLen(oc.length, 'OC') : '';
 
-      document.getElementById('displayTotalPiezasPorCaja').innerHTML =
-        selectedImages.TotalPiezasPorCaja.map(src => `<img src="${src}" class="display-image" />`).join('');
-    }
+  consEl.src = cons ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(cons)}&code=Code128` : '';
+  consEl.style.cssText = cons ? getBarcodeStyleByLen(cons.length, 'CONS') : '';
 
-    async function saveCurrentSet() {
-      const name = ""; // No title 
-      const OCBase64 = selectedOptions.OC ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.OC)}&code=Code128`) : '';
-      const ConsBase64 = selectedOptions.Consecutivo ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.Consecutivo)}&code=Code128`) : '';
-      sets.push({ name, options: { ...selectedOptions }, images: { ...selectedImages, OCBarcode: OCBase64, ConsBarcode: ConsBase64 } });
-      displaySavedSets();
-      resetCurrentSet();
-    }
+  document.getElementById('displayCEDIS').innerHTML =
+    selectedImages.CEDIS ? `<img src="${selectedImages.CEDIS}" class="display-image" />` : '';
 
-    function displaySavedSets() {
-      const container = document.getElementById('savedSetsContainer');
-      container.innerHTML = '';
-      sets.forEach((set, i) => {
-        const div = document.createElement('div');
-        div.className = 'set-box';
-        div.style.position = 'relative';
+  document.getElementById('displayUPC').innerHTML =
+    selectedImages.UPC.map(src => `<img src="${src}" class="display-image" style="max-width: 140px; max-height: 140px;" />`).join('');
 
-        div.innerHTML = `
-          <button onclick="deleteSet(${i})" style="
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: white;
-            color: gray;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            font-size: 14px;
-            line-height: 20px;
-            padding: 0;
-          ">×</button>
-          
-          <div class='set-content' style="display: flex; flex-direction: column; align-items: flex-start;">
-            <div style="display: flex; align-items: flex-start;">
-              <div class='set-label' style="width: 80px; height: 3.02cm">CEDIS:</div>
-              ${set.images.CEDIS ? `<img src="${set.images.CEDIS}" class="display-image" />` : ''}
-            </div>
+  document.getElementById('displayTotalPiezasPorCaja').innerHTML =
+    selectedImages.TotalPiezasPorCaja.map(src => `<img src="${src}" class="display-image" />`).join('');
+}
 
-            <div style="display: flex; align-items: flex-start;">
-              <div class='set-label' style="width: 80px; height: 3.02cm">OC:</div>
-              ${set.images.OCBarcode ? `<img src="${set.images.OCBarcode}" class="display-image"
-                   style="${getBarcodeStyleByLen((set.options.OC || '').length, 'OC')}" />` : ''}
-            </div>
+async function saveCurrentSet() {
+  const name = ""; // No title 
+  const OCBase64 = selectedOptions.OC ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.OC)}&code=Code128`) : '';
+  const ConsBase64 = selectedOptions.Consecutivo ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.Consecutivo)}&code=Code128`) : '';
+  sets.push({ name, options: { ...selectedOptions }, images: { ...selectedImages, OCBarcode: OCBase64, ConsBarcode: ConsBase64 } });
+  displaySavedSets();
+  resetCurrentSet();
+}
 
-            <div style="display: flex; align-items: flex-start;">
-              <div class='set-label' style="width: 80px; height: 2cm">UPC:</div>
-              <div>
-                ${set.images.UPC.map(src => `<img src="${src}" class="display-image" style="max-width: 180px; max-height: 180px;" />`).join('')}
-              </div>
-            </div>
+function displaySavedSets() {
+  const container = document.getElementById('savedSetsContainer');
+  container.innerHTML = '';
+  sets.forEach((set, i) => {
+    const div = document.createElement('div');
+    div.className = 'set-box';
+    div.style.position = 'relative';
 
-            <div style="display: flex; flex-direction: column; align-items: flex-start; margin: 5px 25px 10px 25px; height: 3cm">
-              ${set.images.TotalPiezasPorCaja.map(src => `<img src="${src}" class="display-image" style="width:80px; height:auto;" />`).join('')}
-              <div class='set-label'>TOTAL DE PIEZAS POR CAJA</div>
-            </div>
+    div.innerHTML = `
+      <button onclick="deleteSet(${i})" style="
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: white;
+        color: gray;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 20px;
+        padding: 0;
+      ">×</button>
+      
+      <div class='set-content' style="display: flex; flex-direction: column; align-items: flex-start;">
 
-            <div style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 40px; height: 3.5cm; margin-top: 15px">
-              ${set.images.ConsBarcode ? `<img src="${set.images.ConsBarcode}" class="display-image"
-                   style="${getBarcodeStyleByLen((set.options.Consecutivo || '').length, 'CONS')}" />` : ''}
-              <div class='set-label'>CONSECUTIVO DE CAJA</div>
-            </div>
+        <!-- CEDIS -->
+        <div style="display: flex; align-items: flex-start;">
+          <div class='set-label' style="width: 80px; height: 3.02cm">CEDIS:</div>
+          ${set.images.CEDIS ? `<img src="${set.images.CEDIS}" class="display-image" />` : ''}
+        </div>
+
+        <!-- OC (barcode) -->
+        <div style="display: flex; align-items: flex-start;">
+          <div class='set-label' style="width: 80px; height: 3.02cm">OC:</div>
+          ${
+            set.images.OCBarcode
+              ? `<img src="${set.images.OCBarcode}" class="display-image"
+                   style="${bumpWidthOnly(getBarcodeStyleByLen((set.options.OC || '').length, 'OC'), SAVED_OC_WIDTH_FACTOR)} max-width:none;" />`
+              : ''
+          }
+        </div>
+
+        <!-- UPC -->
+        <div style="display: flex; align-items: flex-start;">
+          <div class='set-label' style="width: 80px; height: 2cm">UPC:</div>
+          <div>
+            ${set.images.UPC.map(src =>
+              `<img src="${src}" class="display-image" style="max-width: 180px; max-height: 180px;" />`
+            ).join('')}
           </div>
-        `;
-        container.appendChild(div);
-      });
+        </div>
+
+        <!-- TOTAL DE PIEZAS POR CAJA -->
+        <div style="display: flex; flex-direction: column; align-items: flex-start; margin: 5px 25px 10px 25px; height: 3cm">
+          ${set.images.TotalPiezasPorCaja.map(src =>
+            `<img src="${src}" class="display-image" style="width:80px; height:auto;" />`
+          ).join('')}
+          <div class='set-label'>TOTAL DE PIEZAS POR CAJA</div>
+        </div>
+
+        <!-- CONSECUTIVO (barcode) -->
+<div style="display: flex; align-items: flex-start;">
+  <!-- left spacer so the image lines up with the others -->
+  <div class="set-label" style="width: 80px;"></div>
+
+  <!-- right column: barcode then caption -->
+  <div style="display:flex; flex-direction:column; align-items:flex-start;">
+    ${
+      set.images.ConsBarcode
+        ? `<img src="${set.images.ConsBarcode}" class="display-image"
+             style="${bumpWidthOnly(getBarcodeStyleByLen((set.options.Consecutivo || '').length, 'CONS'), SAVED_CONS_WIDTH_FACTOR)} max-width:none;" />`
+        : ''
+    }
+    <div class="set-label" style="margin-top: 4px;">CONSECUTIVO DE CAJA</div>
+  </div>
+</div>
+
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function deleteSet(index) {
+  sets.splice(index, 1);
+  displaySavedSets();
+}
+
+async function downloadSavedSetsAsImages() {
+  for (let i = 0; i < sets.length; i++) {
+    const container = document.querySelectorAll('.set-box')[i];
+    const canvas = await html2canvas(container, { scale: 3 });
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `${sets[i].name || 'set'}_${i + 1}.png`;
+    link.click();
+  }
+}
+
+function downloadSavedSetsAsPDF() {
+  const { jsPDF } = window.jspdf;
+
+  // 4×6 inches in centimeters (ratio 2:3)
+  const pageW = 10.16, pageH = 15.24;
+  const orientation = pageH >= pageW ? 'portrait' : 'landscape';
+
+  const pdf = new jsPDF({
+    orientation,
+    unit: 'cm',
+    format: [pageW, pageH]
+  });
+
+  const setBoxes = document.querySelectorAll('.set-box');
+
+  const tasks = Array.from(setBoxes).map(async (box, index) => {
+    const canvas = await html2canvas(box, { scale: 3 });
+    const imgData = canvas.toDataURL('image/png');
+
+    // Fit-to-page while keeping aspect ratio
+    const imgW = canvas.width;
+    const imgH = canvas.height;
+    const imgRatio = imgW / imgH;
+    const pageRatio = pageW / pageH;
+
+    let drawW, drawH, x, y;
+    if (imgRatio > pageRatio) {
+      // Image is wider than page: full width, center vertically
+      drawW = pageW;
+      drawH = drawW / imgRatio;
+      x = 0;
+      y = (pageH - drawH) / 2;
+    } else {
+      // Image is taller than page: full height, center horizontally
+      drawH = pageH;
+      drawW = drawH * imgRatio;
+      x = (pageW - drawW) / 2;
+      y = 0;
     }
 
-    function deleteSet(index) {
-      sets.splice(index, 1);
-      displaySavedSets();
-    }
+    if (index !== 0) pdf.addPage([pageW, pageH], orientation);
+    pdf.addImage(imgData, 'PNG', x, y, drawW, drawH, undefined, 'FAST');
+  });
 
-    async function downloadSavedSetsAsImages() {
-      for (let i = 0; i < sets.length; i++) {
-        const container = document.querySelectorAll('.set-box')[i];
-        const canvas = await html2canvas(container, { scale: 3 });
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = `${sets[i].name || 'set'}_${i + 1}.png`;
-        link.click();
-      }
-    }
+  Promise.all(tasks).then(() => pdf.save('saved_sets.pdf'));
+}
 
-    function downloadSavedSetsAsPDF() {
-      const { jsPDF } = window.jspdf;
+function resetCurrentSet() {
+  selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
+  selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
+  updateResultBox();
 
-      // 4×6 inches in centimeters (ratio 2:3)
-      const pageW = 10.16, pageH = 15.24;
-      const orientation = pageH >= pageW ? 'portrait' : 'landscape';
-
-      const pdf = new jsPDF({
-        orientation,
-        unit: 'cm',
-        format: [pageW, pageH]
-      });
-
-      const setBoxes = document.querySelectorAll('.set-box');
-
-      const tasks = Array.from(setBoxes).map(async (box, index) => {
-        const canvas = await html2canvas(box, { scale: 3 });
-        const imgData = canvas.toDataURL('image/png');
-
-        // Fit-to-page while keeping aspect ratio
-        const imgW = canvas.width;
-        const imgH = canvas.height;
-        const imgRatio = imgW / imgH;
-        const pageRatio = pageW / pageH;
-
-        let drawW, drawH, x, y;
-        if (imgRatio > pageRatio) {
-          // Image is wider than page: full width, center vertically
-          drawW = pageW;
-          drawH = drawW / imgRatio;
-          x = 0;
-          y = (pageH - drawH) / 2;
-        } else {
-          // Image is taller than page: full height, center horizontally
-          drawH = pageH;
-          drawW = drawH * imgRatio;
-          x = (pageW - drawW) / 2;
-          y = 0;
-        }
-
-        if (index !== 0) pdf.addPage([pageW, pageH], orientation);
-        pdf.addImage(imgData, 'PNG', x, y, drawW, drawH, undefined, 'FAST');
-      });
-
-      Promise.all(tasks).then(() => pdf.save('saved_sets.pdf'));
-    }
-
-    function resetCurrentSet() {
-      selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
-      selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
-      updateResultBox();
-
-      // Reset inputs & dropdowns
-      document.querySelectorAll('input').forEach(input => input.value = '');
-      document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
-    }
+  // Reset inputs & dropdowns
+  document.querySelectorAll('input').forEach(input => input.value = '');
+  document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+}
   </script>
 </body>
 </html>
