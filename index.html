@@ -153,7 +153,7 @@
     let selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
     let selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
 
-    // ===== Dynamic barcode sizing tables (edit these numbers to tune sizes) =====
+    // ===== Dynamic barcode sizing tables (edit to tune) =====
     const OC_SIZING = [
       { max: 4,  w: 320, h: 90 },
       { max: 8,  w: 280, h: 80 },
@@ -215,13 +215,18 @@
       consEl.src = cons ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(cons)}&code=Code128` : '';
       consEl.style.cssText = cons ? getBarcodeStyleByLen(cons.length, 'CONS') : '';
 
-      document.getElementById('displayCEDIS').innerHTML = selectedImages.CEDIS ? `<img src="${selectedImages.CEDIS}" class="display-image" />` : '';
-      document.getElementById('displayUPC').innerHTML = selectedImages.UPC.map(src => `<img src="${src}" class="display-image" style="max-width: 140px; max-height: 140px;" />`).join('');
-      document.getElementById('displayTotalPiezasPorCaja').innerHTML = selectedImages.TotalPiezasPorCaja.map(src => `<img src="${src}" class="display-image" />`).join('');
+      document.getElementById('displayCEDIS').innerHTML =
+        selectedImages.CEDIS ? `<img src="${selectedImages.CEDIS}" class="display-image" />` : '';
+
+      document.getElementById('displayUPC').innerHTML =
+        selectedImages.UPC.map(src => `<img src="${src}" class="display-image" style="max-width: 140px; max-height: 140px;" />`).join('');
+
+      document.getElementById('displayTotalPiezasPorCaja').innerHTML =
+        selectedImages.TotalPiezasPorCaja.map(src => `<img src="${src}" class="display-image" />`).join('');
     }
 
     async function saveCurrentSet() {
-      const name = ""; // No title
+      const name = ""; // No title 
       const OCBase64 = selectedOptions.OC ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.OC)}&code=Code128`) : '';
       const ConsBase64 = selectedOptions.Consecutivo ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.Consecutivo)}&code=Code128`) : '';
       sets.push({ name, options: { ...selectedOptions }, images: { ...selectedImages, OCBarcode: OCBase64, ConsBarcode: ConsBase64 } });
@@ -235,7 +240,7 @@
       sets.forEach((set, i) => {
         const div = document.createElement('div');
         div.className = 'set-box';
-        div.style.position = 'relative'; // keep delete btn positioned
+        div.style.position = 'relative';
 
         div.innerHTML = `
           <button onclick="deleteSet(${i})" style="
@@ -253,7 +258,7 @@
             line-height: 20px;
             padding: 0;
           ">×</button>
-
+          
           <div class='set-content' style="display: flex; flex-direction: column; align-items: flex-start;">
             <div style="display: flex; align-items: flex-start;">
               <div class='set-label' style="width: 80px; height: 3.02cm">CEDIS:</div>
@@ -273,14 +278,12 @@
               </div>
             </div>
 
-<div style="display: flex; flex-direction: column; align-items: flex-start; margin: 5px 25px 10px 25px; height: 3cm">
-  ${set.images.TotalPiezasPorCaja.map(src => 
-    `<img src="${src}" class="display-image" style="width:80px; height:auto;" />`
-  ).join('')}
-  <div class='set-label'>TOTAL DE PIEZAS POR CAJA</div>
-</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start; margin: 5px 25px 10px 25px; height: 3cm">
+              ${set.images.TotalPiezasPorCaja.map(src => `<img src="${src}" class="display-image" style="width:80px; height:auto;" />`).join('')}
+              <div class='set-label'>TOTAL DE PIEZAS POR CAJA</div>
+            </div>
 
-            <div style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 40px; height: 3.5cm; margin-top: 20px">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 40px; height: 3.5cm; margin-top: 15px">
               ${set.images.ConsBarcode ? `<img src="${set.images.ConsBarcode}" class="display-image"
                    style="${getBarcodeStyleByLen((set.options.Consecutivo || '').length, 'CONS')}" />` : ''}
               <div class='set-label'>CONSECUTIVO DE CAJA</div>
@@ -292,8 +295,8 @@
     }
 
     function deleteSet(index) {
-      sets.splice(index, 1); // remove 1 item at position index
-      displaySavedSets();    // refresh the display
+      sets.splice(index, 1);
+      displaySavedSets();
     }
 
     async function downloadSavedSetsAsImages() {
@@ -334,11 +337,13 @@
 
         let drawW, drawH, x, y;
         if (imgRatio > pageRatio) {
+          // Image is wider than page: full width, center vertically
           drawW = pageW;
           drawH = drawW / imgRatio;
           x = 0;
           y = (pageH - drawH) / 2;
         } else {
+          // Image is taller than page: full height, center horizontally
           drawH = pageH;
           drawW = drawH * imgRatio;
           x = (pageW - drawW) / 2;
@@ -357,10 +362,8 @@
       selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
       updateResultBox();
 
-      // Reset all text inputs
+      // Reset inputs & dropdowns
       document.querySelectorAll('input').forEach(input => input.value = '');
-
-      // Reset all dropdowns
       document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
     }
   </script>
