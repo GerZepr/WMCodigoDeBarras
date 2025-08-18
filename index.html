@@ -35,15 +35,15 @@
       gap: 10px;
     }
     .set-box {
-  border: 1px solid #ffffff;
-  border-radius: 5px;
-  padding: 15px;
-  margin: 15px auto;
-  background: white;
-  width: 432px;  /* ~6 inches at 72dpi */
-  height: 648px; /* ~9 inches */
-  box-sizing: border-box;
-}
+      border: 1px solid #ffffff;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 15px auto;
+      background: white;
+      width: 432px;  /* ~6 inches at 72dpi */
+      height: 648px; /* ~9 inches */
+      box-sizing: border-box;
+    }
     .set-label {
       font-weight: bold;
       text-align: left;
@@ -64,15 +64,15 @@
         <div class="box"><h3>CEDIS</h3>
           <select class="form-control" onchange="selectOption('CEDIS', this.value, this.options[this.selectedIndex].text)">
             <option value="">Select CEDIS</option>
-            <option value="CEDIS/1_7464.jpg">1_7464</option>
-            <option value="CEDIS/2_4188.jpg">2_4188</option>
-            <option value="CEDIS/3_7487.jpg">3_7487</option>
-            <option value="CEDIS/4_4640.jpg">4_4640</option>
-            <option value="CEDIS/5_4924.jpg">5_4924</option>
-            <option value="CEDIS/6_7468.jpg">6_7468</option>
-            <option value="CEDIS/7_7471.jpg">7_7471</option>
-            <option value="CEDIS/8_7493.jpg">8_7493</option>
-            <option value="CEDIS/9_7490.jpg">9_7490</option>
+            <option value="CEDIS/7464.jpg">1_7464</option>
+            <option value="CEDIS/4188.jpg">2_4188</option>
+            <option value="CEDIS/7487.jpg">3_7487</option>
+            <option value="CEDIS/4640.jpg">4_4640</option>
+            <option value="CEDIS/4924.jpg">5_4924</option>
+            <option value="CEDIS/7468.jpg">6_7468</option>
+            <option value="CEDIS/7471.jpg">7_7471</option>
+            <option value="CEDIS/7493.jpg">8_7493</option>
+            <option value="CEDIS/7490.jpg">9_7490</option>
           </select>
         </div>
       </div>
@@ -85,15 +85,16 @@
         <div class="box"><h3>UPC</h3>
           <select class="form-control" onchange="selectOption('UPC', this.value, this.options[this.selectedIndex].text)">
             <option value="">Select UPC</option>
-            <option value="UPC/1_8809541198618.jpg">1_8809541198618</option>
-            <option value="UPC/2_8809541198625.jpg">2_8809541198625</option>
-            <option value="UPC/3_8809738322017.jpg">3_8809738322017</option>
-            <option value="UPC/4_8809738322284.jpg">4_8809738322284</option>
-            <option value="UPC/5_8809541198984.jpg">5_8809541198984</option>
-            <option value="UPC/6_8809541198632.jpg">6_8809541198632</option>
-            <option value="UPC/7_8809541198649.jpg">7_8809541198649</option>
-            <option value="UPC/8_8809541199974.jpg">8_8809541199974</option>
-            <option value="UPC/9_8809738320136.jpg">9_8809738320136</option>
+            <option value="UPC/ADS761.jpg">1_ADS761</option>
+            <option value="UPC/ADS784.jpg">2_ADS784</option>
+            <option value="UPC/ADS785.jpg">3_ADS785</option>
+            <option value="UPC/ADS840.jpg">4_ADS840</option>
+            <option value="UPC/ADS841.jpg">5_ADS841</option>
+            <option value="UPC/ADS842.jpg">6_ADS842</option>
+            <option value="UPC/ADS843.jpg">7_ADS843</option>
+            <option value="UPC/ADS849.jpg">8_ADS849</option>
+            <option value="UPC/ADS852.jpg">9_ADS852</option>
+            <option value="UPC/ADS863.jpg">10_ADS863</option>
           </select>
         </div>
       </div>
@@ -101,10 +102,10 @@
         <div class="box"><h3>TOTAL DE PIEZAS POR CAJA</h3>
           <select class="form-control" onchange="selectOption('TotalPiezasPorCaja', this.value, this.options[this.selectedIndex].text)">
             <option value="">Select quantity</option>
-            <option value="TotalPiezasPorCaja/1_6.jpg">6 piezas</option>
-            <option value="TotalPiezasPorCaja/2_10.jpg">10 piezas</option>
-            <option value="TotalPiezasPorCaja/3_12.jpg">12 piezas</option>
-            <option value="TotalPiezasPorCaja/4_24.jpg">24 piezas</option>
+            <option value="TotalPiezasPorCaja/6.jpg">6 piezas</option>
+            <option value="TotalPiezasPorCaja/10.jpg">10 piezas</option>
+            <option value="TotalPiezasPorCaja/12.jpg">12 piezas</option>
+            <option value="TotalPiezasPorCaja/24.jpg">24 piezas</option>
           </select>
         </div>
       </div>
@@ -113,13 +114,6 @@
           <input type="text" class="form-control" placeholder="Box sequence" oninput="updateManualInput('Consecutivo', this.value)" />
         </div>
       </div>
-      <!--
-      <div class="col-md-4">
-        <div class="box"><h3>PRODUCTO</h3>
-          <input type="text" id="setName" class="form-control" placeholder="Name this set" />
-        </div>
-      </div>
-      -->
 
       <!-- Preview -->
       <div class="col-md-12">
@@ -159,6 +153,27 @@
     let selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
     let selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
 
+    // ===== Dynamic barcode sizing tables (edit these numbers to tune sizes) =====
+    const OC_SIZING = [
+      { max: 4,  w: 320, h: 90 },
+      { max: 8,  w: 280, h: 80 },
+      { max: 12, w: 240, h: 70 },
+      { max: 20, w: 200, h: 60 },
+      { max: 999, w: 180, h: 55 },
+    ];
+    const CONS_SIZING = [
+      { max: 4,  w: 320, h: 90 },
+      { max: 8,  w: 280, h: 80 },
+      { max: 12, w: 240, h: 70 },
+      { max: 20, w: 200, h: 60 },
+      { max: 999, w: 180, h: 55 },
+    ];
+    function getBarcodeStyleByLen(len, type = 'OC') {
+      const table = type === 'OC' ? OC_SIZING : CONS_SIZING;
+      const rule = table.find(r => len <= r.max) || table[table.length - 1];
+      return `width:${rule.w}px; height:${rule.h}px;`;
+    }
+
     async function convertBarcodeToBase64(url) {
       const proxyURL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
       const response = await fetch(proxyURL);
@@ -188,16 +203,25 @@
     }
 
     function updateResultBox() {
-      document.getElementById('barcodeOC').src = selectedOptions.OC ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.OC)}&code=Code128` : '';
-      document.getElementById('barcodeConsecutivo').src = selectedOptions.Consecutivo ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.Consecutivo)}&code=Code128` : '';
+      const oc = selectedOptions.OC || '';
+      const cons = selectedOptions.Consecutivo || '';
+
+      const ocEl = document.getElementById('barcodeOC');
+      const consEl = document.getElementById('barcodeConsecutivo');
+
+      ocEl.src = oc ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(oc)}&code=Code128` : '';
+      ocEl.style.cssText = oc ? getBarcodeStyleByLen(oc.length, 'OC') : '';
+
+      consEl.src = cons ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(cons)}&code=Code128` : '';
+      consEl.style.cssText = cons ? getBarcodeStyleByLen(cons.length, 'CONS') : '';
+
       document.getElementById('displayCEDIS').innerHTML = selectedImages.CEDIS ? `<img src="${selectedImages.CEDIS}" class="display-image" />` : '';
       document.getElementById('displayUPC').innerHTML = selectedImages.UPC.map(src => `<img src="${src}" class="display-image" style="max-width: 140px; max-height: 140px;" />`).join('');
       document.getElementById('displayTotalPiezasPorCaja').innerHTML = selectedImages.TotalPiezasPorCaja.map(src => `<img src="${src}" class="display-image" />`).join('');
     }
 
     async function saveCurrentSet() {
-      //const name = document.getElementById('setName').value.trim() || `Set ${sets.length + 1}`;
-      const name = ""; // No title 
+      const name = ""; // No title
       const OCBase64 = selectedOptions.OC ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.OC)}&code=Code128`) : '';
       const ConsBase64 = selectedOptions.Consecutivo ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.Consecutivo)}&code=Code128`) : '';
       sets.push({ name, options: { ...selectedOptions }, images: { ...selectedImages, OCBarcode: OCBase64, ConsBarcode: ConsBase64 } });
@@ -205,59 +229,72 @@
       resetCurrentSet();
     }
 
-    function resetCurrentSet() {
-      selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
-      selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
-      updateResultBox();
-      document.querySelectorAll('input').forEach(input => input.value = '');
+    function displaySavedSets() {
+      const container = document.getElementById('savedSetsContainer');
+      container.innerHTML = '';
+      sets.forEach((set, i) => {
+        const div = document.createElement('div');
+        div.className = 'set-box';
+        div.style.position = 'relative'; // keep delete btn positioned
+
+        div.innerHTML = `
+          <button onclick="deleteSet(${i})" style="
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: white;
+            color: gray;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 20px;
+            padding: 0;
+          ">×</button>
+
+          <div class='set-content' style="display: flex; flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; align-items: flex-start;">
+              <div class='set-label' style="width: 80px; height: 3.02cm">CEDIS:</div>
+              ${set.images.CEDIS ? `<img src="${set.images.CEDIS}" class="display-image" />` : ''}
+            </div>
+
+            <div style="display: flex; align-items: flex-start;">
+              <div class='set-label' style="width: 80px; height: 3.02cm">OC:</div>
+              ${set.images.OCBarcode ? `<img src="${set.images.OCBarcode}" class="display-image"
+                   style="${getBarcodeStyleByLen((set.options.OC || '').length, 'OC')}" />` : ''}
+            </div>
+
+            <div style="display: flex; align-items: flex-start;">
+              <div class='set-label' style="width: 80px; height: 2cm">UPC:</div>
+              <div>
+                ${set.images.UPC.map(src => `<img src="${src}" class="display-image" style="max-width: 140px; max-height: 140px;" />`).join('')}
+              </div>
+            </div>
+
+<div style="display: flex; flex-direction: column; align-items: flex-start; margin: 5px 25px 10px 25px; height: 3cm">
+  ${set.images.TotalPiezasPorCaja.map(src => 
+    `<img src="${src}" class="display-image" style="width:80px; height:auto;" />`
+  ).join('')}
+  <div class='set-label'>TOTAL DE PIEZAS POR CAJA</div>
+</div>
+
+            <div style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 40px; height: 3.5cm; margin-top: 20px">
+              ${set.images.ConsBarcode ? `<img src="${set.images.ConsBarcode}" class="display-image"
+                   style="${getBarcodeStyleByLen((set.options.Consecutivo || '').length, 'CONS')}" />` : ''}
+              <div class='set-label'>CONSECUTIVO DE CAJA</div>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
     }
 
-    function displaySavedSets() {
-  const container = document.getElementById('savedSetsContainer');
-  container.innerHTML = '';
-  sets.forEach((set, i) => {
-    const div = document.createElement('div');
-    div.className = 'set-box';
-    div.style.position = 'relative'; // So the delete button can be positioned
-
-    div.innerHTML = `
-      <button onclick="deleteSet(${i})" style="
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background-color: white;
-        color: gray;
-        border: none;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        cursor: pointer;
-        font-size: 14px;
-        line-height: 20px;
-        padding: 0;
-      ">×</button>
-      
-      <div class='set-content' style="display: flex; flex-direction: column; align-items: flex-start;">
-        <div style="display: flex; align-items: flex-start;"><div class='set-label' style="width: 80px; height: 3.02cm">CEDIS:</div><img src="${set.images.CEDIS}" class="display-image" /></div>
-        <div style="display: flex; align-items: flex-start;"><div class='set-label' style="width: 80px; height: 3.02cm">OC:</div><img src="${set.images.OCBarcode}" class="display-image" /></div>
-        <div style="display: flex; align-items: flex-start;"><div class='set-label' style="width: 80px; height: 2cm">UPC:</div><div>${set.images.UPC.map(src => `<img src="${src}" class="display-image" style="max-width: 140px; max-height: 140px;" />`).join('')}</div></div>
-        <div style="display: flex; flex-direction: column; align-items: flex-start; margin: 5px 25px 10px 25px; height: 3cm">
-          ${set.images.TotalPiezasPorCaja.map(src => `<img src="${src}" class="display-image" />`).join('')}
-          <div class='set-label'>TOTAL DE PIEZAS POR CAJA</div>
-        </div>
-        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 40px; height: 3.5cm;margin-top: 50px">
-          <img src="${set.images.ConsBarcode}" class="display-image" />
-          <div class='set-label'>CONSECUTIVO DE CAJA</div>
-        </div>
-      </div>
-    `;
-    container.appendChild(div);
-  });
-}
-function deleteSet(index) {
-  sets.splice(index, 1); // remove 1 item at position index
-  displaySavedSets();    // refresh the display
-}
+    function deleteSet(index) {
+      sets.splice(index, 1); // remove 1 item at position index
+      displaySavedSets();    // refresh the display
+    }
 
     async function downloadSavedSetsAsImages() {
       for (let i = 0; i < sets.length; i++) {
@@ -272,28 +309,60 @@ function deleteSet(index) {
 
     function downloadSavedSetsAsPDF() {
       const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'cm', format: [10.16, 15.24] });
+
+      // 4×6 inches in centimeters (ratio 2:3)
+      const pageW = 10.16, pageH = 15.24;
+      const orientation = pageH >= pageW ? 'portrait' : 'landscape';
+
+      const pdf = new jsPDF({
+        orientation,
+        unit: 'cm',
+        format: [pageW, pageH]
+      });
+
       const setBoxes = document.querySelectorAll('.set-box');
+
       const tasks = Array.from(setBoxes).map(async (box, index) => {
         const canvas = await html2canvas(box, { scale: 3 });
         const imgData = canvas.toDataURL('image/png');
-        if (index !== 0) pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, 0, 4, 6);
+
+        // Fit-to-page while keeping aspect ratio
+        const imgW = canvas.width;
+        const imgH = canvas.height;
+        const imgRatio = imgW / imgH;
+        const pageRatio = pageW / pageH;
+
+        let drawW, drawH, x, y;
+        if (imgRatio > pageRatio) {
+          drawW = pageW;
+          drawH = drawW / imgRatio;
+          x = 0;
+          y = (pageH - drawH) / 2;
+        } else {
+          drawH = pageH;
+          drawW = drawH * imgRatio;
+          x = (pageW - drawW) / 2;
+          y = 0;
+        }
+
+        if (index !== 0) pdf.addPage([pageW, pageH], orientation);
+        pdf.addImage(imgData, 'PNG', x, y, drawW, drawH, undefined, 'FAST');
       });
+
       Promise.all(tasks).then(() => pdf.save('saved_sets.pdf'));
     }
 
     function resetCurrentSet() {
-  selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
-  selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
-  updateResultBox();
+      selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
+      selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
+      updateResultBox();
 
-  // Reset all text inputs
-  document.querySelectorAll('input').forEach(input => input.value = '');
+      // Reset all text inputs
+      document.querySelectorAll('input').forEach(input => input.value = '');
 
-  // Reset all dropdowns
-  document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
-}
+      // Reset all dropdowns
+      document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+    }
   </script>
 </body>
 </html>
