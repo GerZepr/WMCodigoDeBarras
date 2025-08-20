@@ -125,6 +125,12 @@
 .set-box .set-row:nth-child(3) .upc-img {
   margin-left: -0.5cm;
 }
+
+/* Make TOTAL DE PIEZAS POR CAJA image a bit bigger in saved set */
+.set-box .piezas-img {
+  width: calc(var(--pzs-w) * 1.3);   /* 30% bigger */
+  height: calc(var(--pzs-h) * 1.3);
+}
 </style>
 </head>
 <body>
@@ -177,7 +183,7 @@
           <select class="form-control" onchange="selectOption('TotalPiezasPorCaja', this.value, this.options[this.selectedIndex].text)">
             <option value="">Select quantity</option>
             <option value="TotalPiezasPorCaja/6.jpg">6 piezas</option>
-            <option value="TotalPiezasPorCaja/10.jpg">10 piezas</option>
+            <option value="TotalPiezasPorCaja/10_nuevmedida.jpg">10 piezas</option>
             <option value="TotalPiezasPorCaja/12.jpg">12 piezas</option>
             <option value="TotalPiezasPorCaja/24.jpg">24 piezas</option>
           </select>
