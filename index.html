@@ -6,128 +6,124 @@
   <title>Codigo de Barra Mariana</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 <style>
-  /* ==== General Layout (preview & input) ==== */
-  .box {
-    border: 1px solid #007bff;
-    border-radius: 5px;
-    padding: 20px;
-    text-align: center;
-    margin: 10px;
-    background-color: #f8f9fa;
-  }
-  .display-image {
-    margin: 5px auto;
-    display: block;
-    object-fit: contain;
-    max-width: 100px;  /* keep PREVIEW small */
-    max-height: 100px;
-  }
-  .result-row { display: flex; align-items: center; margin-bottom: 20px; }
-  .result-label { width: 180px; font-weight: bold; text-align: left; }
-  .result-content { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+/* ==== General Layout (preview & input) ==== */
+.box {
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  padding: 20px;
+  text-align: center;
+  margin: 10px;
+  background-color: #f8f9fa;
+}
+.display-image {
+  margin: 5px auto;
+  display: block;
+  object-fit: contain;
+  max-width: 100px;  /* keep PREVIEW small */
+  max-height: 100px;
+}
+.result-row { display: flex; align-items: center; margin-bottom: 20px; }
+.result-label { width: 180px; font-weight: bold; text-align: left; }
+.result-content { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 
-  /* ==== Saved set card — exact 4×6in page, no borders ==== */
-  .set-box {
-    width: 10.16cm;     /* page width */
-    height: 15.24cm;    /* page height */
-    padding: 0;         /* no outer padding so it can truly cover the page */
-    margin: 0 auto;
-    background: #fff;
-    box-sizing: border-box;
-    position: relative;
-    border: none;
-    box-shadow: none;   /* remove drop shadow so exports edge-to-edge */
-  }
+/* ==== Saved set card — exact 4×6in page, no borders ==== */
+.set-box {
+  width: 10.16cm;     /* page width */
+  height: 15.24cm;    /* page height */
+  padding: 0;         /* no outer padding so it can truly cover the page */
+  margin: 0 auto;
+  background: #fff;
+  box-sizing: border-box;
+  position: relative;
+  border: none;
+  box-shadow: none;   /* remove drop shadow so exports edge-to-edge */
+}
 
-  /* Inner content padding (small) */
-  .set-content {
-    padding: 0.35cm;    /* adjust if you want even tighter edge coverage */
-    text-align: left;
-    height: calc(100% - 0.7cm); /* account for padding top+bottom */
-    box-sizing: border-box;
-  }
+/* Inner content padding (small) */
+.set-content {
+  padding: 0.35cm;    /* adjust if you want even tighter edge coverage */
+  text-align: left;
+  height: calc(100% - 0.7cm); /* account for padding top+bottom */
+  box-sizing: border-box;
+}
+.set-label { font-weight: bold; text-align: left; }
 
-  .set-label { font-weight: bold; text-align: left; }
+/* Delete button */
+.delete-btn {
+  position: absolute; top: 0.2cm; right: 0.2cm;
+  background-color: #ffffff; color: #555;
+  border: 1px solid #ddd; border-radius: 50%;
+  width: 0.6cm; height: 0.6cm;
+  cursor: pointer; font-size: 14px; line-height: 0.6cm;
+  padding: 0; display: flex; align-items: center; justify-content: center;
+}
+.delete-btn:hover { background:#f5f5f5; }
 
-  /* Delete button (still available if you want it) */
-  .delete-btn {
-    position: absolute; top: 0.2cm; right: 0.2cm;
-    background-color: #ffffff; color: #555;
-    border: 1px solid #ddd; border-radius: 50%;
-    width: 0.6cm; height: 0.6cm;
-    cursor: pointer; font-size: 14px; line-height: 0.6cm;
-    padding: 0; display: flex; align-items: center; justify-content: center;
-  }
-  .delete-btn:hover { background:#f5f5f5; }
+/* ==== Saved-set layout & spacing ==== */
+.set-row {
+  display: flex;
+  align-items: center;
+  gap: 0.2cm;
+  margin-bottom: 0.35cm;    /* spacing between rows */
+}
+.set-row:last-child { margin-bottom: 0; }
 
-  /* ==== Saved-set layout & spacing ==== */
-  .set-row {
-    display: flex;
-    align-items: center;      /* vertically center in row */
-    gap: 0.2cm;
-    margin-bottom: 0.35cm;    /* spacing between rows */
-  }
-  .set-row:last-child { margin-bottom: 0; }
+/* Fixed label column so all images/barcodes start at same x */
+.set-row .set-label {
+  width: 2.0cm;
+  flex: 0 0 2.0cm;
+  font-weight: bold;
+}
 
-  /* Fixed label column so all images/barcodes start at same x */
-  .set-row .set-label {
-    width: 2.0cm;             /* label column (increase/decrease to taste) */
-    flex: 0 0 2.0cm;
-    font-weight: bold;
-  }
+.set-row .set-payload {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.2cm;
+  padding: 0;
+}
 
-  .set-row .set-payload {
-    flex: 1;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-start;  /* same left edge for all */
-    gap: 0.2cm;
-    padding: 0;
-  }
+/* Remove accidental offsets */
+.set-row .set-payload img,
+.oc-barcode, .cons-barcode {
+  display: block;
+  object-fit: contain;
+  padding: 0;
+}
 
-  /* Remove accidental offsets */
-  .set-row .set-payload img,
-  .oc-barcode, .cons-barcode {
-    display: block;
-    object-fit: contain;
+/* ==== BIGGER sizes in centimeters (tuned to fill the page fully) ==== */
+:root {
+  /* product/cedis/upc images (non-barcode) */
+  --cedis-w: 3.0cm;  --cedis-h: 2.4cm;
+  --upc-w:   5.2cm;  --upc-h: 2.2cm;
+  --pzs-w:   2.0cm;  --pzs-h: 1.8cm;
 
-    padding: 0;
-  }
+  /* barcodes */
+  --oc-w:    4.6cm;  --oc-h: 2.2cm;
+  --cons-w:  4.4cm;  --cons-h: 2.0cm;
 
-  /* ==== BIGGER sizes in centimeters (tuned to fill the page) ==== */
-  :root{
-    /* product/cedis/upc images (non-barcode) */
-    --cedis-w: 2.4cm;  --cedis-h: 1.9cm;   /* was ~1.2×1.0 — now much larger */
-    --upc-w:   4.2cm;  --upc-h:   1.8cm;   /* largest, like mockup */
-    --pzs-w:   1.6cm;  --pzs-h:   1.5cm;   /* small but readable */
+  /* captions under last two sections */
+  --caption-gap: 0.25cm;
+}
 
-    /* barcodes */
-    --oc-w:    3.8cm;  --oc-h:    1.8cm;   /* wider than CEDIS, close to UPC height */
-    --cons-w:  3.6cm;  --cons-h:  1.7cm;   /* medium */
+/* Apply sizes */
+.cedis-img     { width: var(--cedis-w); height: var(--cedis-h); }
+.upc-img       { width: var(--upc-w);   height: var(--upc-h); }
+.piezas-img    { width: var(--pzs-w);   height: var(--pzs-h); }
+.oc-barcode    { width: var(--oc-w);    height: var(--oc-h); }
+.cons-barcode  { width: var(--cons-w);  height: var(--cons-h); }
 
-    /* captions under last two sections */
-    --caption-gap: 0.2cm;
-  }
+/* Captions under the last two */
+.caption-under { margin-top: var(--caption-gap); font-weight: bold; }
 
-
-  /* Apply sizes */
-  .cedis-img     { width: var(--cedis-w); height: var(--cedis-h); }
-  .upc-img       { width: var(--upc-w);   height: var(--upc-h); }
-  .piezas-img    { width: var(--pzs-w);   height: var(--pzs-h); }
-  .oc-barcode    { width: var(--oc-w);    height: var(--oc-h); }
-  .cons-barcode  { width: var(--cons-w);  height: var(--cons-h); }
-
-  /* Captions under the last two */
-  .caption-under { margin-top: var(--caption-gap); font-weight: bold; }
-
-  .upc-img {
-  width: var(--upc-w);
-  height: var(--upc-h);
-  margin-left: -0.30cm; /* adjust: -0.1cm ≈ -4px, -0.15cm ≈ -6px */
+/* UPC fine-tune overlap */
+.upc-img {
+  margin-left: -0.30cm;
 }
 .set-box .set-row:nth-child(3) .upc-img {
-  margin-left: -0.4cm; /* try -0.3cm to -0.5cm until it looks right */
+  margin-left: -0.5cm;
 }
 </style>
 </head>
