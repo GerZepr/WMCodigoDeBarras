@@ -231,6 +231,19 @@
     </div>
   </div>
 
+<div class="col-md-12 text-center mt-2">
+  <button class="btn btn-primary" onclick="saveCurrentSet()">Guardar</button>
+
+  <!-- NEW: keep selections toggle -->
+  <div class="form-check d-inline-block ml-2">
+    <input class="form-check-input" type="checkbox" id="keepSelections" checked>
+    <label class="form-check-label" for="keepSelections">Mantener opciones después de guardar</label>
+  </div>
+
+  <!-- Optional: quick manual clear -->
+  <button class="btn btn-secondary ml-2" onclick="resetCurrentSet()">Limpiar</button>
+</div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -286,14 +299,38 @@
         selectedImages.TotalPiezasPorCaja.map(src => `<img src="${src}" class="piezas-img" />`).join('');
     }
 
-    async function saveCurrentSet() {
-      const name = "";
-      const OCBase64 = selectedOptions.OC ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.OC)}&code=Code128`) : '';
-      const ConsBase64 = selectedOptions.Consecutivo ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.Consecutivo)}&code=Code128`) : '';
-      sets.push({ name, options: { ...selectedOptions }, images: { ...selectedImages, OCBarcode: OCBase64, ConsBarcode: ConsBase64 } });
-      displaySavedSets();
-      resetCurrentSet();
-    }
+async function saveCurrentSet() {
+  const name = ""; // No title 
+  const OCBase64 = selectedOptions.OC
+    ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.OC)}&code=Code128`)
+    : '';
+  const ConsBase64 = selectedOptions.Consecutivo
+    ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.Consecutivo)}&code=Code128`)
+    : '';
+
+  // Deep-ish snapshot so later edits don’t mutate saved sets
+  const optionsSnapshot = {
+    CEDIS: selectedOptions.CEDIS,
+    OC: selectedOptions.OC,
+    Consecutivo: selectedOptions.Consecutivo,
+    UPC: [...selectedOptions.UPC],
+    TotalPiezasPorCaja: [...selectedOptions.TotalPiezasPorCaja],
+  };
+  const imagesSnapshot = {
+    CEDIS: selectedImages.CEDIS,
+    UPC: [...selectedImages.UPC],
+    TotalPiezasPorCaja: [...selectedImages.TotalPiezasPorCaja],
+    OCBarcode: OCBase64,
+    ConsBarcode: ConsBase64,
+  };
+
+  sets.push({ name, options: optionsSnapshot, images: imagesSnapshot });
+  displaySavedSets();
+
+  // Only clear if the toggle is OFF
+  const keep = document.getElementById('keepSelections')?.checked;
+  if (!keep) resetCurrentSet();
+}
 
     function displaySavedSets() {
       const container = document.getElementById('savedSetsContainer');
