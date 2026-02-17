@@ -5,145 +5,132 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Codigo de Barra Mariana</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-<style>
-/* ==== General Layout (preview & input) ==== */
-.box {
-  border: 1px solid #007bff;
-  border-radius: 5px;
-  padding: 20px;
-  text-align: center;
-  margin: 10px;
-  background-color: #f8f9fa;
-}
-.display-image {
-  margin: 5px auto;
-  display: block;
-  object-fit: contain;
-  max-width: 100px;  /* keep PREVIEW small */
-  max-height: 100px;
-}
-.result-row { display: flex; align-items: center; margin-bottom: 20px; }
-.result-label { width: 180px; font-weight: bold; text-align: left; }
-.result-content { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 
-/* ==== Saved set card — exact 4×6in page, no borders ==== */
-.set-box {
-  width: 10.16cm;     /* page width */
-  height: 15.24cm;    /* page height */
-  padding: 0;         /* no outer padding so it can truly cover the page */
-  margin: 0 auto;
-  background: #fff;
-  box-sizing: border-box;
-  position: relative;
-  border: none;
-  box-shadow: none;   /* remove drop shadow so exports edge-to-edge */
-}
+  <style>
+    /* ==== General Layout (preview & input) ==== */
+    .box {
+      border: 1px solid #007bff;
+      border-radius: 5px;
+      padding: 20px;
+      text-align: center;
+      margin: 10px;
+      background-color: #f8f9fa;
+    }
+    .display-image {
+      margin: 5px auto;
+      display: block;
+      object-fit: contain;
+      max-width: 100px;  /* keep PREVIEW small */
+      max-height: 100px;
+    }
+    .result-row { display: flex; align-items: center; margin-bottom: 20px; }
+    .result-label { width: 180px; font-weight: bold; text-align: left; }
+    .result-content { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 
-/* Inner content padding (small) */
-.set-content {
-  padding: 0.35cm;    /* adjust if you want even tighter edge coverage */
-  text-align: left;
-  height: calc(100% - 0.7cm); /* account for padding top+bottom */
-  box-sizing: border-box;
-}
-.set-label { font-weight: bold; text-align: left; }
+    /* ==== Saved set card — exact 4×6in page, no borders ==== */
+    .set-box {
+      width: 10.16cm;     /* page width */
+      height: 15.24cm;    /* page height */
+      padding: 0;
+      margin: 0 auto;
+      background: #fff;
+      box-sizing: border-box;
+      position: relative;
+      border: none;
+      box-shadow: none;
+    }
 
-/* Delete button */
-.delete-btn {
-  position: absolute; top: 0.2cm; right: 0.2cm;
-  background-color: #ffffff; color: #555;
-  border: 1px solid #ddd; border-radius: 50%;
-  width: 0.6cm; height: 0.6cm;
-  cursor: pointer; font-size: 14px; line-height: 0.6cm;
-  padding: 0; display: flex; align-items: center; justify-content: center;
-}
-.delete-btn:hover { background:#f5f5f5; }
+    .set-content {
+      padding: 0.35cm;
+      text-align: left;
+      height: calc(100% - 0.7cm);
+      box-sizing: border-box;
+    }
+    .set-label { font-weight: bold; text-align: left; }
 
-/* ==== Saved-set layout & spacing ==== */
-.set-row {
-  display: flex;
-  align-items: center;
-  gap: 0.2cm;
-  margin-bottom: 0.35cm;    /* spacing between rows */
-}
-.set-row:last-child { margin-bottom: 0; }
+    .delete-btn {
+      position: absolute; top: 0.2cm; right: 0.2cm;
+      background-color: #ffffff; color: #555;
+      border: 1px solid #ddd; border-radius: 50%;
+      width: 0.6cm; height: 0.6cm;
+      cursor: pointer; font-size: 14px; line-height: 0.6cm;
+      padding: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .delete-btn:hover { background:#f5f5f5; }
 
-/* Fixed label column so all images/barcodes start at same x */
-.set-row .set-label {
-  width: 2.0cm;
-  flex: 0 0 2.0cm;
-  font-weight: bold;
-}
+    .set-row {
+      display: flex;
+      align-items: center;
+      gap: 0.2cm;
+      margin-bottom: 0.35cm;
+    }
+    .set-row:last-child { margin-bottom: 0; }
 
-.set-row .set-payload {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.2cm;
-  padding: 0;
-}
+    .set-row .set-label {
+      width: 2.0cm;
+      flex: 0 0 2.0cm;
+      font-weight: bold;
+    }
 
-/* Remove accidental offsets */
-.set-row .set-payload img,
-.oc-barcode, .cons-barcode {
-  display: block;
-  object-fit: contain;
-  padding: 0;
-}
+    .set-row .set-payload {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.2cm;
+      padding: 0;
+    }
 
-/* ==== BIGGER sizes in centimeters (tuned to fill the page fully) ==== */
-:root {
-  /* product/cedis/upc images (non-barcode) */
-  --cedis-w: 3.0cm;  --cedis-h: 2.4cm;
-  --upc-w:   5.2cm;  --upc-h: 2.2cm;
-  --pzs-w:   2.0cm;  --pzs-h: 1.8cm;
+    .set-row .set-payload img,
+    .oc-barcode, .cons-barcode {
+      display: block;
+      object-fit: contain;
+      padding: 0;
+    }
 
-  /* barcodes */
-  --oc-w:    4.6cm;  --oc-h: 2.2cm;
-  --cons-w:  4.4cm;  --cons-h: 2.0cm;
+    :root {
+      --cedis-w: 3.0cm;  --cedis-h: 2.4cm;
+      --upc-w:   5.2cm;  --upc-h: 2.2cm;
+      --pzs-w:   2.0cm;  --pzs-h: 1.8cm;
 
-  /* captions under last two sections */
-  --caption-gap: 0.25cm;
-}
+      --oc-w:    4.6cm;  --oc-h: 2.2cm;
+      --cons-w:  4.4cm;  --cons-h: 2.0cm;
 
-/* Apply sizes */
-.cedis-img     { width: var(--cedis-w); height: var(--cedis-h); }
-.upc-img       { width: var(--upc-w);   height: var(--upc-h); }
-.piezas-img    { width: var(--pzs-w);   height: var(--pzs-h); }
-.oc-barcode    { width: var(--oc-w);    height: var(--oc-h); }
-.cons-barcode  { width: var(--cons-w);  height: var(--cons-h); }
+      --caption-gap: 0.25cm;
+    }
 
-/* Captions under the last two */
-.caption-under { margin-top: var(--caption-gap); font-weight: bold; }
+    .cedis-img     { width: var(--cedis-w); height: var(--cedis-h); }
+    .upc-img       { width: var(--upc-w);   height: var(--upc-h); }
+    .piezas-img    { width: var(--pzs-w);   height: var(--pzs-h); }
+    .oc-barcode    { width: var(--oc-w);    height: var(--oc-h); }
+    .cons-barcode  { width: var(--cons-w);  height: var(--cons-h); }
+    .caption-under { margin-top: var(--caption-gap); font-weight: bold; }
 
-/* UPC fine-tune overlap */
-.upc-img {
-  margin-left: -0.30cm;
-}
-.set-box .set-row:nth-child(3) .upc-img {
-  margin-left: -0.5cm;
-}
+    .upc-img { margin-left: -0.30cm; }
+    .set-box .set-row:nth-child(3) .upc-img { margin-left: -0.5cm; }
 
-/* Make TOTAL DE PIEZAS POR CAJA image a bit bigger in saved set */
-.set-box .piezas-img {
-  width: calc(var(--pzs-w) * 1.3);   /* 30% bigger */
-  height: calc(var(--pzs-h) * 1.3);
-}
-/* ONLY the "10 piezas" image wider (keep height the same) */
-.set-box .set-payload img.piezas-img[src$="/10.jpg"],
-.set-box .set-payload img.piezas-img[src*="TotalPiezasPorCaja/10"],
-.set-box .piezas-10 {
-  width: calc(var(--pzs-w) * 1.5) !important;  /* ← adjust 1.5 as you like */
-  height: var(--pzs-h) !important;             /* keep original height */
-}
-</style>
+    /* bigger TOTAL DE PIEZAS in saved set */
+    .set-box .piezas-img {
+      width: 2.6cm;
+      height: 2.34cm;
+    }
+
+    /* If you want special-case for 10_nuevmedida */
+    .set-box .piezas-10 {
+      width: 3.0cm !important;
+      height: 2.34cm !important;
+    }
+
+    #statusMsg { font-size: 14px; }
+  </style>
 </head>
+
 <body>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="#">Create Barcode</a>
   </nav>
+
   <div class="container mt-4">
     <div class="row">
       <!-- Input Boxes -->
@@ -165,11 +152,13 @@
           </select>
         </div>
       </div>
+
       <div class="col-md-4">
         <div class="box"><h3>OC</h3>
           <input type="text" class="form-control" placeholder="Enter OC" oninput="updateManualInput('OC', this.value)" />
         </div>
       </div>
+
       <div class="col-md-4">
         <div class="box"><h3>UPC</h3>
           <select class="form-control" onchange="selectOption('UPC', this.value, this.options[this.selectedIndex].text)">
@@ -190,6 +179,7 @@
           </select>
         </div>
       </div>
+
       <div class="col-md-4">
         <div class="box"><h3>TOTAL DE PIEZAS POR CAJA</h3>
           <select class="form-control" onchange="selectOption('TotalPiezasPorCaja', this.value, this.options[this.selectedIndex].text)">
@@ -201,6 +191,7 @@
           </select>
         </div>
       </div>
+
       <div class="col-md-4">
         <div class="box"><h3>CONSECUTIVO DE CAJA:</h3>
           <input type="text" class="form-control" placeholder="Box sequence" oninput="updateManualInput('Consecutivo', this.value)" />
@@ -219,9 +210,18 @@
         </div>
       </div>
 
-      <!-- Buttons -->
+      <!-- Buttons (single area) -->
       <div class="col-md-12 text-center mt-2">
-        <button class="btn btn-primary" onclick="saveCurrentSet()">Guardar</button>
+        <button type="button" class="btn btn-primary" onclick="saveCurrentSet()">Guardar</button>
+
+        <div class="form-check d-inline-block ml-2">
+          <input class="form-check-input" type="checkbox" id="keepSelections" checked>
+          <label class="form-check-label" for="keepSelections">Mantener opciones después de guardar</label>
+        </div>
+
+        <button type="button" class="btn btn-secondary ml-2" onclick="resetCurrentSet()">Limpiar</button>
+
+        <div id="statusMsg" class="text-danger mt-2"></div>
       </div>
 
       <div class="col-md-12 mt-4">
@@ -230,42 +230,53 @@
       </div>
 
       <div class="col-md-12 text-center mt-3">
-        <button class="btn btn-success" onclick="downloadSavedSetsAsImages()">Descargar como imagen</button>
-        <button class="btn btn-danger" onclick="downloadSavedSetsAsPDF()">Descargar como PDF (4x6)</button>
+        <button type="button" class="btn btn-success" onclick="downloadSavedSetsAsImages()">Descargar como imagen</button>
+        <button type="button" class="btn btn-danger" onclick="downloadSavedSetsAsPDF()">Descargar como PDF (4x6)</button>
       </div>
     </div>
   </div>
-
-<div class="col-md-12 text-center mt-2">
-  <button class="btn btn-primary" onclick="saveCurrentSet()">Guardar</button>
-
-  <!-- NEW: keep selections toggle -->
-  <div class="form-check d-inline-block ml-2">
-    <input class="form-check-input" type="checkbox" id="keepSelections" checked>
-    <label class="form-check-label" for="keepSelections">Mantener opciones después de guardar</label>
-  </div>
-
-  <!-- Optional: quick manual clear -->
-  <button class="btn btn-secondary ml-2" onclick="resetCurrentSet()">Limpiar</button>
-</div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
+    // State
     const sets = [];
     let selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
     let selectedImages  = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
 
+    function setStatus(msg = '') {
+      const el = document.getElementById('statusMsg');
+      if (el) el.textContent = msg;
+    }
+
+    function tecItUrl(value) {
+      return `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(value)}&code=Code128`;
+    }
+
     async function convertBarcodeToBase64(url) {
       const proxyURL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
       const response = await fetch(proxyURL);
+      if (!response.ok) {
+        throw new Error(`AllOrigins failed: ${response.status}`);
+      }
       const blob = await response.blob();
       return await new Promise(resolve => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
         reader.readAsDataURL(blob);
       });
+    }
+
+    async function safeBarcodeImage(value, labelForMsg) {
+      const url = tecItUrl(value);
+      try {
+        return await convertBarcodeToBase64(url);
+      } catch (err) {
+        console.warn('Barcode proxy failed:', err);
+        setStatus(`⚠️ No pude convertir ${labelForMsg} a base64 (proxy). Se guardó como URL. Exportar PDF/imagen puede fallar.`);
+        return url; // fallback so Save still works
+      }
     }
 
     function updateManualInput(box, value) {
@@ -289,10 +300,8 @@
       const oc = selectedOptions.OC || '';
       const cons = selectedOptions.Consecutivo || '';
 
-      document.getElementById('barcodeOC').src =
-        oc ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(oc)}&code=Code128` : '';
-      document.getElementById('barcodeConsecutivo').src =
-        cons ? `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(cons)}&code=Code128` : '';
+      document.getElementById('barcodeOC').src = oc ? tecItUrl(oc) : '';
+      document.getElementById('barcodeConsecutivo').src = cons ? tecItUrl(cons) : '';
 
       document.getElementById('displayCEDIS').innerHTML =
         selectedImages.CEDIS ? `<img src="${selectedImages.CEDIS}" class="cedis-img" />` : '';
@@ -304,38 +313,41 @@
         selectedImages.TotalPiezasPorCaja.map(src => `<img src="${src}" class="piezas-img" />`).join('');
     }
 
-async function saveCurrentSet() {
-  const name = ""; // No title 
-  const OCBase64 = selectedOptions.OC
-    ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.OC)}&code=Code128`)
-    : '';
-  const ConsBase64 = selectedOptions.Consecutivo
-    ? await convertBarcodeToBase64(`https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(selectedOptions.Consecutivo)}&code=Code128`)
-    : '';
+    async function saveCurrentSet() {
+      setStatus('');
 
-  // Deep-ish snapshot so later edits don’t mutate saved sets
-  const optionsSnapshot = {
-    CEDIS: selectedOptions.CEDIS,
-    OC: selectedOptions.OC,
-    Consecutivo: selectedOptions.Consecutivo,
-    UPC: [...selectedOptions.UPC],
-    TotalPiezasPorCaja: [...selectedOptions.TotalPiezasPorCaja],
-  };
-  const imagesSnapshot = {
-    CEDIS: selectedImages.CEDIS,
-    UPC: [...selectedImages.UPC],
-    TotalPiezasPorCaja: [...selectedImages.TotalPiezasPorCaja],
-    OCBarcode: OCBase64,
-    ConsBarcode: ConsBase64,
-  };
+      const ocVal = selectedOptions.OC || '';
+      const consVal = selectedOptions.Consecutivo || '';
 
-  sets.push({ name, options: optionsSnapshot, images: imagesSnapshot });
-  displaySavedSets();
+      // Convert barcodes (with fallback). Do it in parallel:
+      const [OCBarcode, ConsBarcode] = await Promise.all([
+        ocVal ? safeBarcodeImage(ocVal, 'OC') : Promise.resolve(''),
+        consVal ? safeBarcodeImage(consVal, 'Consecutivo') : Promise.resolve('')
+      ]);
 
-  // Only clear if the toggle is OFF
-  const keep = document.getElementById('keepSelections')?.checked;
-  if (!keep) resetCurrentSet();
-}
+      // Snapshot so later edits don’t mutate saved sets
+      const optionsSnapshot = {
+        CEDIS: selectedOptions.CEDIS,
+        OC: ocVal,
+        Consecutivo: consVal,
+        UPC: [...selectedOptions.UPC],
+        TotalPiezasPorCaja: [...selectedOptions.TotalPiezasPorCaja],
+      };
+
+      const imagesSnapshot = {
+        CEDIS: selectedImages.CEDIS,
+        UPC: [...selectedImages.UPC],
+        TotalPiezasPorCaja: [...selectedImages.TotalPiezasPorCaja],
+        OCBarcode,
+        ConsBarcode,
+      };
+
+      sets.push({ name: "", options: optionsSnapshot, images: imagesSnapshot });
+      displaySavedSets();
+
+      const keep = document.getElementById('keepSelections')?.checked;
+      if (!keep) resetCurrentSet();
+    }
 
     function displaySavedSets() {
       const container = document.getElementById('savedSetsContainer');
@@ -345,41 +357,44 @@ async function saveCurrentSet() {
         const div = document.createElement('div');
         div.className = 'set-box';
         div.innerHTML = `
-          <button onclick="deleteSet(${i})" class="delete-btn">×</button>
-          <div class='set-content'>
+          <button type="button" onclick="deleteSet(${i})" class="delete-btn">×</button>
+          <div class="set-content">
             <div class="set-row">
               <div class="set-label">CEDIS:</div>
               <div class="set-payload">
                 ${set.images.CEDIS ? `<img src="${set.images.CEDIS}" class="cedis-img" />` : '—'}
               </div>
             </div>
+
             <div class="set-row">
               <div class="set-label">OC:</div>
               <div class="set-payload">
                 ${set.images.OCBarcode ? `<img src="${set.images.OCBarcode}" class="oc-barcode" />` : '—'}
               </div>
             </div>
-<div class="set-row">
-  <div class="set-label">UPC:</div>
-  <div class="set-payload">
-    ${(set.images.UPC || []).length
-      ? set.images.UPC.map(src => `<img src="${src}" class="upc-img" />`).join('')
-      : '—'}
-  </div>
-</div>
+
+            <div class="set-row">
+              <div class="set-label">UPC:</div>
+              <div class="set-payload">
+                ${(set.images.UPC || []).length
+                  ? set.images.UPC.map(src => `<img src="${src}" class="upc-img" />`).join('')
+                  : '—'}
+              </div>
+            </div>
+
             <div class="set-row">
               <div class="set-label"></div>
               <div class="set-payload" style="flex-direction:column; align-items:flex-start;">
-               ${(set.images.TotalPiezasPorCaja || []).length
-  ? set.images.TotalPiezasPorCaja.map(src => {
-      const isTen = /\/10\.(jpg|jpeg|png|webp)$/i.test(src);
-      const extraClass = isTen ? ' piezas-10' : '';
-      return `<img src="${src}" class="piezas-img${extraClass}" />`;
-    }).join('')
-  : '—'}
+                ${(set.images.TotalPiezasPorCaja || []).length
+                  ? set.images.TotalPiezasPorCaja.map(src => {
+                      const isTen = /10_nuevmedida\.(jpg|jpeg|png|webp)$/i.test(src);
+                      return `<img src="${src}" class="piezas-img${isTen ? ' piezas-10' : ''}" />`;
+                    }).join('')
+                  : '—'}
                 <div class="caption-under">TOTAL DE PIEZAS POR CAJA</div>
               </div>
             </div>
+
             <div class="set-row">
               <div class="set-label"></div>
               <div class="set-payload" style="flex-direction:column; align-items:flex-start;">
@@ -387,7 +402,8 @@ async function saveCurrentSet() {
                 <div class="caption-under">CONSECUTIVO DE CAJA</div>
               </div>
             </div>
-          </div>`;
+          </div>
+        `;
         container.appendChild(div);
       });
     }
@@ -400,7 +416,7 @@ async function saveCurrentSet() {
     async function downloadSavedSetsAsImages() {
       for (let i = 0; i < sets.length; i++) {
         const container = document.querySelectorAll('.set-box')[i];
-        const canvas = await html2canvas(container, { scale: 3 });
+        const canvas = await html2canvas(container, { scale: 3, useCORS: true, allowTaint: true });
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/png');
         link.download = `${sets[i].name || 'set'}_${i + 1}.png`;
@@ -412,13 +428,16 @@ async function saveCurrentSet() {
       const { jsPDF } = window.jspdf;
       const pageW = 10.16, pageH = 15.24;
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'cm', format: [pageW, pageH] });
+
       const setBoxes = document.querySelectorAll('.set-box');
 
       const tasks = Array.from(setBoxes).map(async (box, index) => {
-        const canvas = await html2canvas(box, { scale: 3 });
+        const canvas = await html2canvas(box, { scale: 3, useCORS: true, allowTaint: true });
         const imgData = canvas.toDataURL('image/png');
+
         const imgRatio = canvas.width / canvas.height;
         const pageRatio = pageW / pageH;
+
         let drawW, drawH, x, y;
         if (imgRatio > pageRatio) {
           drawW = pageW; drawH = drawW / imgRatio;
@@ -427,18 +446,22 @@ async function saveCurrentSet() {
           drawH = pageH; drawW = drawH * imgRatio;
           x = (pageW - drawW) / 2; y = 0;
         }
+
         if (index !== 0) pdf.addPage([pageW, pageH], 'portrait');
         pdf.addImage(imgData, 'PNG', x, y, drawW, drawH, undefined, 'FAST');
       });
+
       Promise.all(tasks).then(() => pdf.save('saved_sets.pdf'));
     }
 
     function resetCurrentSet() {
       selectedOptions = { CEDIS: '', OC: '', Consecutivo: '', UPC: [], TotalPiezasPorCaja: [] };
-      selectedImages = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
+      selectedImages  = { CEDIS: '', UPC: [], TotalPiezasPorCaja: [] };
       updateResultBox();
+
       document.querySelectorAll('input').forEach(input => input.value = '');
       document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+      setStatus('');
     }
   </script>
 </body>
